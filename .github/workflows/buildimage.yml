@@ -3,7 +3,7 @@ name: Build and Publish Image
 on:
   push:
     branches:
-      - main  # Cambia esto por la rama que prefieras
+      - main  
   pull_request:
     branches:
       - main
@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'  # Cambia esto por la versión de .NET que uses
+          dotnet-version: '8.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -40,4 +40,3 @@ jobs:
         run: |
           docker build -t jf202107309/lab03_bd-ii_prometheus:latest .
           docker push jf202107309/lab03_bd-ii_prometheus:latest
-

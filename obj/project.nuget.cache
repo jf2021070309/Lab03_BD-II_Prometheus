@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "wImGCYC1XQc=",
+  "dgSpecHash": "ozKrsy4vZzA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\ClienteAPI\\ClienteAPI.csproj",
+  "projectFilePath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Jaimeelias\\.nuget\\packages\\aspnetcore.healthchecks.sqlserver\\8.0.2\\aspnetcore.healthchecks.sqlserver.8.0.2.nupkg.sha512",
     "C:\\Users\\Jaimeelias\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",

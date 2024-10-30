@@ -1,0 +1,43 @@
+name: Build and Publish Image
+
+on:
+  push:
+    branches:
+      - main  # Cambia esto por la rama que prefieras
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'  # Cambia esto por la versión de .NET que uses
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build the project
+        run: dotnet build --configuration Release
+
+      - name: Publish the project
+        run: dotnet publish --configuration Release --output ./publish
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}  
+
+      - name: Build Docker image
+        run: |
+          docker build -t jf202107309/lab03_bd-ii_prometheus:latest .
+          docker push jf202107309/lab03_bd-ii_prometheus:latest
+

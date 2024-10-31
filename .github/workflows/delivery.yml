@@ -24,32 +24,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-
       - name: Pull Docker image
         run: |
           docker pull jf202107309/lab03_bd-ii_prometheus:latest
-
       - name: Run Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
-
       - name: Wait for the API to be ready
         run: |
           echo "Waiting for API to start..."
           for i in {1..20}; do  # 20 intentos de 30 segundos cada uno (total 10 minutos)
             sleep 30
-            response=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:5000/metrics)
-            if [ "$response" -eq 200 ]; then
-              echo "API is ready!"
-              break
-            else
-              echo "Attempt $i: API not ready, response code: $response"
-            fi
+            echo "Checking health status..."
+            curl -G http://host.docker.internal:5000/metrics --data-urlencode 'query=healthcheck_status'
           done
-
-      - name: Get healthcheck_status from Prometheus
-        run: |
-          echo "Checking health status..."
-          response=$(curl -G http://host.docker.internal:5000/metrics --data-urlencode 'query=healthcheck_status')
-          echo "Response from Prometheus:"
-          echo "$response"

@@ -1,71 +1,38 @@
 name: Delivery Workflow
 
 on:
-  workflow_dispatch:  # Permite activar el workflow manualmente
+  workflow_dispatch: # Activado manualmente
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Puedes elegir el runner que prefieras
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v3  # Usar la última versión
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install Docker
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker.io
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get install -y docker-compose
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Start services with Docker Compose
-      run: |
-        # Iniciar los servicios definidos en el docker-compose.yml
-        docker-compose up -d
+      - name: Pull Docker image
+        run: |
+          docker pull jf202107309/lab03_bd-ii_prometheus:latest
 
-    - name: Wait for API to be available
-      run: |
-        echo "Waiting for API to be available..."
-        for i in {1..30}; do
-          if curl --output /dev/null --silent --head --fail http://localhost:5000/healthz; then
-            echo "API is up and running."
-            break
-          fi
-          echo "API aún no está lista, intento $i. Reintentando en 2 segundos..."
-          sleep 2
-          if [ $i -eq 30 ]; then
-            echo "API no se inició después de 30 intentos."
-            exit 1
-          fi
-        done
+      - name: Run Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d
 
-    - name: Wait for Prometheus to be available
-      run: |
-        echo "Waiting for Prometheus to be available..."
-        for i in {1..30}; do
-          if curl --output /dev/null --silent --head --fail http://localhost:9090/; then
-            echo "Prometheus is up and running."
-            break
-          fi
-          echo "Prometheus aún no está listo, intento $i. Reintentando en 2 segundos..."
-          sleep 2
-          if [ $i -eq 30 ]; then
-            echo "Prometheus no se inició después de 30 intentos."
-            exit 1
-          fi
-        done
+      - name: Wait for the API to be ready
+        run: |
+          echo "Waiting for API to start..."
+          sleep 30  # Esperar a que el contenedor esté listo (ajusta según sea necesario)
 
-    - name: Get metrics from Prometheus
-      run: |
-        # Realizar una petición GET a Prometheus para obtener la métrica healthcheck_status
-        METRIC_NAME="healthcheck_status"
-        RESPONSE=$(curl -s "http://localhost:9090/api/v1/query?query=$METRIC_NAME")
-        echo "Response from Prometheus:"
-        echo $RESPONSE
-
-    - name: Stop services
-      run: |
-        # Detener y eliminar los servicios después de obtener la métrica
-        docker-compose down
+      - name: Get metrics from Prometheus
+        run: |
+          curl -G http://localhost:9090/api/v1/query --data-urlencode 'query=healthcheck_status'

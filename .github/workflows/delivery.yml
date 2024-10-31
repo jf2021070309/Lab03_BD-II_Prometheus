@@ -33,33 +33,35 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      - name: Check health status of host.docker.internal:5000
+      # Verificación del estado de salud en localhost:5000
+      - name: Check health status of localhost:5000
         run: |
-          echo "Checking health status of host.docker.internal:5000..."
-          for i in {1..10}; do  # 20 intentos de 30 segundos cada uno (total 10 minutos)
+          echo "Checking health status of localhost:5000..."
+          for i in {1..10}; do  # 10 intentos de 30 segundos cada uno (total 5 minutos)
             sleep 30
             health_check_response=$(curl -s -G http://localhost:5000/api/v1/query --data-urlencode 'query=healthcheck_status')
             echo "Health check response: $health_check_response"
 
             # Verificar si la respuesta contiene un estado saludable (1)
             if [[ $health_check_response == *'"value":[*1*' ]]; then
-                echo "Health status of host.docker.internal:5000 is 1 (healthy)."
+                echo "Health status of localhost:5000 is 1 (healthy)."
                 break  # Salir del bucle si el estado es saludable
             else
-                echo "Health status of host.docker.internal:5000 is not 1 (not healthy). Retrying..."
+                echo "Health status of localhost:5000 is not 1 (not healthy). Retrying..."
             fi
             
             # Si es el último intento, fallar el paso
-            if [ $i -eq 20 ]; then
-                echo "Failed to get a healthy status from host.docker.internal:5000 after 20 attempts."
-                exit 1  # Fallar el paso si la API no está saludable después de 20 intentos
+            if [ $i -eq 10 ]; then
+                echo "Failed to get a healthy status from localhost:5000 after 10 attempts."
+                exit 1  # Fallar el paso si la API no está saludable después de 10 intentos
             fi
           done
 
+      # Verificación del estado de salud en localhost:9090
       - name: Check health status of localhost:9090
         run: |
           echo "Checking health status of localhost:9090..."
-          for i in {1..10}; do  # 20 intentos de 30 segundos cada uno (total 10 minutos)
+          for i in {1..10}; do  # 10 intentos de 30 segundos cada uno (total 5 minutos)
             sleep 30
             health_check_response=$(curl -s -G http://localhost:9090/api/v1/query --data-urlencode 'query=healthcheck_status')
             echo "Health check response: $health_check_response"
@@ -73,8 +75,8 @@ jobs:
             fi
             
             # Si es el último intento, fallar el paso
-            if [ $i -eq 20 ]; then
-                echo "Failed to get a healthy status from localhost:9090 after 20 attempts."
-                exit 1  # Fallar el paso si la API no está saludable después de 20 intentos
+            if [ $i -eq 10 ]; then
+                echo "Failed to get a healthy status from localhost:9090 after 10 attempts."
+                exit 1  # Fallar el paso si la API no está saludable después de 10 intentos
             fi
           done

@@ -1,58 +1,46 @@
 name: Delivery Workflow
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch: # Permite activar el workflow manualmente
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Check out the repository
+      uses: actions/checkout@v2
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+    - name: Pull Docker image from Docker Hub
+      run: |
+        # Descargar la imagen desde Docker Hub
+        docker pull jf202107309/lab03_bd-ii_prometheus:latest
 
-      - name: Pull Docker images
-        run: |
-          docker pull jf202107309/lab03_bd-ii_prometheus:latest
+    - name: Start Docker container
+      run: |
+        # Iniciar el contenedor usando la imagen descargada
+        docker run -d --name prometheus -p 9090:9090 jf202107309/lab03_bd-ii_prometheus:latest
 
-      - name: Clean up any existing containers
-        run: |
-          docker container prune -f
+    - name: Wait for Prometheus to be ready
+      run: |
+        # Esperar a que Prometheus esté disponible
+        echo "Waiting for Prometheus to be available..."
+        until $(curl --output /dev/null --silent --head --fail http://host.docker.internal:9090/); do
+            printf '.'
+            sleep 5
+        done
+        echo "Prometheus is up and running."
 
-      - name: Run Prometheus container
-        run: |
-          docker run -d --name prometheus -p 9091:9090 jf202107309/lab03_bd-ii_prometheus:latest
+    - name: Get metrics from Prometheus
+      run: |
+        # Realizar una petición GET a Prometheus para obtener una métrica específica
+        METRIC_NAME="healthcheck_status"
+        RESPONSE=$(curl -s "http://host.docker.internal:9090/api/v1/query?query=$METRIC_NAME")
+        echo "Response from Prometheus:"
+        echo $RESPONSE
 
-      - name: Wait for API to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:5000/swagger; then
-              echo "API is ready."
-              break
-            else
-              echo "Waiting for API to be ready... (attempt $i)"
-              sleep 5
-            fi
-          done
-
-      - name: Check Prometheus status
-        run: |
-          for i in {1..45}; do  
-            if curl -fs http://localhost:9091/-/healthy; then
-              echo "Prometheus is healthy."
-              break
-            else
-              echo "Waiting for Prometheus to be healthy... (attempt $i)"
-              sleep 5
-            fi
-          done
-
-      - name: Make GET request to Prometheus
-        run: |
-          curl -G http://localhost:9091/api/v1/query --data-urlencode 'query=up' || echo "Failed to query Prometheus"
+    - name: Stop Docker container
+      run: |
+        # Detener y eliminar el contenedor después de obtener la métrica
+        docker stop prometheus
+        docker rm prometheus

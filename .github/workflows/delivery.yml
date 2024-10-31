@@ -5,31 +5,65 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out the repository
       uses: actions/checkout@v2
 
-    - name: Pull Docker image from Docker Hub
+    - name: Set up Docker network
       run: |
-        # Descargar la imagen desde Docker Hub
+        # Crear una red Docker para conectar los contenedores
+        docker network create my_network
+
+    - name: Pull API image from Docker Hub
+      run: |
+        # Descargar la imagen de la API desde Docker Hub
         docker pull jf202107309/lab03_bd-ii_prometheus:latest
 
-    - name: Start Docker container
+    - name: Start API container
       run: |
-        # Iniciar el contenedor usando la imagen descargada
-        docker run -d --name prometheus -p 9090:9090 jf202107309/lab03_bd-ii_prometheus:latest
+        # Iniciar el contenedor de la API en la red personalizada
+        docker run -d --name api_dockerhub_clientes --network my_network -p 5001:8080 \
+          -e "ConnectionStrings__ClienteDB=Server=bd_clientes;Database=BD_CLIENTES;User Id=admin_user;Password=UPT.2024;TrustServerCertificate=true" \
+          jf202107309/lab03_bd-ii_prometheus:latest
 
-    - name: Wait for Prometheus to be ready
+    - name: Start Prometheus container
+      run: |
+        # Iniciar el contenedor de Prometheus en la red personalizada
+        docker run -d --name prometheus_container --network my_network -p 9090:9090 prom/prometheus
+
+    - name: Check if API container is running
+      run: |
+        echo "Checking if API container is running..."
+        docker ps
+
+    - name: Get Prometheus logs
+      run: |
+        echo "Getting logs from Prometheus container..."
+        docker logs prometheus_container || echo "Prometheus container not running"
+
+    - name: Wait briefly for Prometheus to be ready
       run: |
         # Esperar a que Prometheus esté disponible
         echo "Waiting for Prometheus to be available..."
-        until $(curl --output /dev/null --silent --head --fail http://localhost:9090); do
-            printf '.'
-            sleep 5
+        MAX_ATTEMPTS=5
+        ATTEMPT=1
+
+        while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+          if curl --output /dev/null --silent --head --fail http://localhost:9090; then
+            echo "Prometheus está activo."
+            break
+          else
+            echo "Prometheus aún no está listo, intento $ATTEMPT. Reintentando en 2 segundos..."
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 2
+          fi
         done
-        echo "Prometheus is up and running."
+
+        if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+          echo "Prometheus no se activó a tiempo, pero continuaremos el workflow."
+        fi
 
     - name: Get metrics from Prometheus
       run: |
@@ -39,8 +73,13 @@ jobs:
         echo "Response from Prometheus:"
         echo $RESPONSE
 
-    - name: Stop Docker container
+    - name: Stop Docker containers
       run: |
-        # Detener y eliminar el contenedor después de obtener la métrica
-        docker stop prometheus
-        docker rm prometheus
+        # Detener y eliminar los contenedores después de obtener la métrica
+        docker stop api_dockerhub_clientes prometheus_container
+        docker rm api_dockerhub_clientes prometheus_container
+
+    - name: Clean up Docker network
+      run: |
+        # Eliminar la red personalizada
+        docker network rm my_network

@@ -20,11 +20,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
       - name: Pull Docker image
         run: |
           docker pull jf202107309/lab03_bd-ii_prometheus:latest
@@ -33,21 +28,23 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      - name: Wait for the API to be ready
+      - name: Check health status of localhost:5000
         run: |
-          echo "Waiting for API to start..."
-          for i in {1..20}; do  # 20 intentos de 30 segundos cada uno (total 10 minutos)
-            sleep 30
-            echo "Checking health status..."
-            health_status=$(curl -s -G http://localhost:9090/api/v1/query --data-urlencode 'query=healthcheck_status')
-            echo "Current health status: $health_status"
-            if [[ $health_status == *'"value":[*1*' ]]; then
-              echo "API is healthy."
-              break
+          echo "Checking health status of localhost:5000..."
+          for i in {1..20}; do
+            sleep 30  # Esperar 30 segundos antes de reintentar
+            health_check_response=$(curl -s -G http://localhost:5000/api/v1/query --data-urlencode 'query=healthcheck_status')
+            echo "Health check response: $health_check_response"
+
+            if [[ $health_check_response == *'"value":[*1*' ]]; then
+                echo "Health status is 1 (healthy)."
+                break
+            else
+                echo "Health status is not 1 (not healthy). Retrying..."
+            fi
+            
+            if [ $i -eq 20 ]; then
+                echo "Failed to get a healthy status after 20 attempts."
+                exit 1
             fi
           done
-
-      - name: Check logs if API is unhealthy
-        run: |
-          echo "Checking logs for api_dockerhub_clientes..."
-          docker logs api_dockerhub_clientes

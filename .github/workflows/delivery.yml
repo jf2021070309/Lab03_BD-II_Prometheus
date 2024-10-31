@@ -1,58 +1,56 @@
 name: Delivery Workflow
 
 on:
-  workflow_dispatch:  # Este evento permite ejecutar el flujo de trabajo manualmente
+  workflow_dispatch:  # Permite ejecutar el flujo de trabajo manualmente
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Descarga el código del repositorio
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # 2. Inicia sesión en Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Pull Docker images
+      # 3. Descarga la imagen de Docker de Prometheus previamente publicada
+      - name: Pull Docker image
         run: |
           docker pull jf202107309/lab03_bd-ii_prometheus:latest
 
-      - name: Clean up any existing Prometheus containers
+      # 4. Limpia cualquier contenedor de Prometheus en ejecución
+      - name: Clean up existing Prometheus container
         run: |
           if [ "$(docker ps -aq -f name=prometheus)" ]; then
             docker stop prometheus
             docker rm prometheus
           fi
 
+      # 5. Inicia el contenedor de Prometheus
       - name: Run Prometheus container
         run: |
           docker run -d --name prometheus -p 9091:9090 jf202107309/lab03_bd-ii_prometheus:latest
 
+      # 6. Espera unos segundos para asegurar que Prometheus esté completamente listo
       - name: Wait for Prometheus to be ready
-        run: |
-          sleep 10  # Espera unos segundos para asegurarte de que Prometheus esté completamente iniciado
+        run: sleep 10
 
-      - name: Test Prometheus health endpoint
+      # 7. Verifica el estado de Prometheus mediante el endpoint de salud
+      - name: Check Prometheus health endpoint
         run: |
-          curl -s http://localhost:9091/-/healthy
-
-      - name: Check Prometheus status
-        run: |
-          echo "Checking Prometheus status..."
-          if ! timeout 120 bash -c 'until curl -s http://localhost:9091/-/healthy; do echo "Waiting for Prometheus to be healthy..."; sleep 2; done'; then
+          if ! curl -fs http://localhost:9091/-/healthy; then
             echo "Prometheus did not become healthy in time."
             exit 1
           fi
 
+      # 8. Realiza una consulta GET a Prometheus para verificar las métricas
       - name: Make GET request to Prometheus
         run: |
-          curl -G http://localhost:9091/api/v1/query --data-urlencode 'query=up' || echo "Failed to query Prometheus"
-
-      - name: Stop and remove Prometheus container
-        run: |
-          docker stop prometheus
-          docker rm prometheus
+          response=$(curl -sG http://localhost:9091/api/v1/query --data-urlencode 'query=up')
+          echo "Prometheus response: $response"

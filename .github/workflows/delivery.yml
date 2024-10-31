@@ -31,11 +31,21 @@ jobs:
           --config.file=/etc/prometheus/prometheus.yml \
           --storage.tsdb.path=/prometheus
 
+    - name: Check if API container is running
+      run: |
+        echo "Checking if API container is running..."
+        docker ps
+
+    - name: Get Prometheus logs
+      run: |
+        echo "Getting logs from Prometheus container..."
+        docker logs prometheus_container || echo "Prometheus container not running"
+
     - name: Wait for Prometheus to be ready
       run: |
         # Esperar a que Prometheus esté disponible
         echo "Waiting for Prometheus to be available..."
-        until $(curl --output /dev/null --silent --head --fail http://host.docker.internal:9090/); do
+        until $(curl --output /dev/null --silent --head --fail http://localhost:9090/); do
             printf '.'
             sleep 5
         done
@@ -45,7 +55,7 @@ jobs:
       run: |
         # Realizar una petición GET a Prometheus para obtener una métrica específica
         METRIC_NAME="healthcheck_status"
-        RESPONSE=$(curl -s "http://host.docker.internal:9090/api/v1/query?query=$METRIC_NAME")
+        RESPONSE=$(curl -s "http://localhost:9090/api/v1/query?query=$METRIC_NAME")
         echo "Response from Prometheus:"
         echo $RESPONSE
 

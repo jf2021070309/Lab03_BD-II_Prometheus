@@ -28,6 +28,22 @@ jobs:
           -e "ConnectionStrings__ClienteDB=Server=bd_clientes;Database=BD_CLIENTES;User Id=admin_user;Password=UPT.2024;TrustServerCertificate=true" \
           jf202107309/lab03_bd-ii_prometheus:latest
           
+    - name: Wait for API to be ready
+      run: |
+        echo "Waiting for API to be available..."
+        for i in {1..30}; do
+          if curl --output /dev/null --silent --head --fail http://localhost:5000/; then
+            echo "API is up and running."
+            break
+          fi
+          echo "API aún no está lista, intento $i. Reintentando en 2 segundos..."
+          sleep 2
+          if [ $i -eq 30 ]; then
+            echo "API no se inició después de 30 intentos."
+            exit 1
+          fi
+        done
+
     - name: Start Prometheus container
       run: |
         # Iniciar el contenedor de Prometheus en la red

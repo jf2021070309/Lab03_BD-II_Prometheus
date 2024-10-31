@@ -39,7 +39,18 @@ jobs:
 
       # 6. Espera unos segundos para asegurar que Prometheus esté completamente listo
       - name: Wait for Prometheus to be ready
-        run: sleep 10
+        run: |
+          for i in {1..45}; do  # Incrementa el número de intentos para esperar más tiempo
+            if curl -fs http://localhost:9091/-/healthy; then
+              echo "Prometheus is ready."
+              exit 0
+            fi
+            echo "Waiting for Prometheus to be healthy... (attempt $i)"
+            sleep 5
+          done
+          echo "Prometheus did not become healthy in time. Showing logs for debugging:"
+          docker logs prometheus  # Muestra los logs del contenedor en caso de fallo
+          exit 1
 
       # 7. Verifica el estado de Prometheus mediante el endpoint de salud
       - name: Check Prometheus health endpoint

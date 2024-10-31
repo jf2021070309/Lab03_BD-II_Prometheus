@@ -11,11 +11,8 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v3  # Usar la última versión
 
-    - name: Set up Docker Compose
-      run: |
-        # Instalar Docker y Docker Compose si es necesario
-        sudo apt-get update
-        sudo apt-get install -y docker.io docker-compose
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
 
     - name: Start services with Docker Compose
       run: |

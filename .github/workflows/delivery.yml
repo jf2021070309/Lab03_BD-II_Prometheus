@@ -32,24 +32,17 @@ jobs:
         run: |
           docker run -d --name prometheus -p 9091:9090 jf202107309/lab03_bd-ii_prometheus:latest
 
-      - name: Verify if Prometheus container is running
-        run: |
-          docker ps | grep prometheus || echo "Prometheus container is not running"
-
       - name: Wait for Prometheus to be ready
         run: |
-          sleep 10  # Espera unos segundos para asegurarte de que Prometheus esté completamente iniciado
+          sleep 30  # Espera unos segundos para asegurarte de que Prometheus esté completamente iniciado
 
       - name: Check Prometheus status
         run: |
-          until curl -s http://localhost:9091/-/healthy; do
-            echo "Waiting for Prometheus to be healthy..."
-            sleep 2
-          done
-
-      - name: Check Prometheus logs
-        run: |
-          docker logs prometheus
+          echo "Checking Prometheus status..."
+          if ! timeout 60 bash -c 'until curl -s http://localhost:9091/-/healthy; do echo "Waiting for Prometheus to be healthy..."; sleep 2; done'; then
+            echo "Prometheus did not become healthy in time."
+            exit 1
+          fi
 
       - name: Make GET request to Prometheus
         run: |

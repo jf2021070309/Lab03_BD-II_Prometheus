@@ -38,5 +38,5 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t jf202107309/lab03_bd-ii_prometheus:latest .
+          docker build -t jf202107309/lab03_bd-ii_prometheus:latest -f ClienteAPI/Dockerfile .
           docker push jf202107309/lab03_bd-ii_prometheus:latest

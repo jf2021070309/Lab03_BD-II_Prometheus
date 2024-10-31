@@ -38,6 +38,18 @@ jobs:
           echo "Waiting for API to start..."
           for i in {1..20}; do  # 20 intentos de 30 segundos cada uno (total 10 minutos)
             sleep 30
-            echo "Checking health status..."
-            curl -G http://localhost:9090/api/v1/query --data-urlencode 'query=healthcheck_status'
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:5000/metrics)
+            if [ "$response" -eq 200 ]; then
+              echo "API is ready!"
+              break
+            else
+              echo "Attempt $i: API not ready, response code: $response"
+            fi
           done
+
+      - name: Get healthcheck_status from Prometheus
+        run: |
+          echo "Checking health status..."
+          response=$(curl -G http://host.docker.internal:5000/metrics --data-urlencode 'query=healthcheck_status')
+          echo "Response from Prometheus:"
+          echo "$response"

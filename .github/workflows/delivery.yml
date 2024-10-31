@@ -32,6 +32,10 @@ jobs:
         run: |
           docker run -d --name prometheus -p 9091:9090 jf202107309/lab03_bd-ii_prometheus:latest
 
+      - name: Verify if Prometheus container is running
+        run: |
+          docker ps | grep prometheus || echo "Prometheus container is not running"
+
       - name: Wait for Prometheus to be ready
         run: |
           sleep 10  # Espera unos segundos para asegurarte de que Prometheus esté completamente iniciado
@@ -42,6 +46,10 @@ jobs:
             echo "Waiting for Prometheus to be healthy..."
             sleep 2
           done
+
+      - name: Check Prometheus logs
+        run: |
+          docker logs prometheus
 
       - name: Make GET request to Prometheus
         run: |

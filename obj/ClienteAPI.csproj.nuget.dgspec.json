@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {}
+    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {
+    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
+        "projectUniqueName": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
         "projectName": "ClienteAPI",
-        "projectPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
+        "projectPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
         "packagesPath": "C:\\Users\\Jaimeelias\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\repo\\Lab03_BD-II_Prometheus\\obj\\",
+        "outputPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Jaimeelias\\AppData\\Roaming\\NuGet\\NuGet.Config",

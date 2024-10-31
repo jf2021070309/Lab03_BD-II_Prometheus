@@ -1,38 +1,32 @@
 name: Delivery Workflow
 
 on:
-  workflow_dispatch: # Permite activar el workflow manualmente
+  workflow_dispatch:  # Permite activar el workflow manualmente
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Puedes elegir el runner que prefieras
+    runs-on: ubuntu-latest  # Puedes elegir el runner que prefieras
 
     steps:
     - name: Check out the repository
       uses: actions/checkout@v3  # Usar la última versión
 
-    - name: Create a Docker network
+    - name: Set up Docker Compose
       run: |
-        # Crear una red de Docker personalizada para la comunicación entre contenedores
-        docker network create my_network
+        # Instalar Docker y Docker Compose si es necesario
+        sudo apt-get update
+        sudo apt-get install -y docker.io docker-compose
 
-    - name: Pull API image from Docker Hub
+    - name: Start services with Docker Compose
       run: |
-        # Descargar la imagen de la API desde Docker Hub
-        docker pull jf202107309/lab03_bd-ii_prometheus:latest
-        
-    - name: Start API container
-      run: |
-        # Iniciar el contenedor de la API en la red
-        docker run -d --name api_dockerhub_clientes --network my_network -p 5000:8080 \
-          -e "ConnectionStrings__ClienteDB=Server=bd_clientes;Database=BD_CLIENTES;User Id=admin_user;Password=UPT.2024;TrustServerCertificate=true" \
-          jf202107309/lab03_bd-ii_prometheus:latest
-          
-    - name: Wait for API to be ready
+        # Iniciar los servicios definidos en el docker-compose.yml
+        docker-compose up -d
+
+    - name: Wait for API to be available
       run: |
         echo "Waiting for API to be available..."
         for i in {1..30}; do
-          if curl --output /dev/null --silent --head --fail http://localhost:5000/; then
+          if curl --output /dev/null --silent --head --fail http://localhost:5000/healthz; then
             echo "API is up and running."
             break
           fi
@@ -44,28 +38,8 @@ jobs:
           fi
         done
 
-    - name: Start Prometheus container
+    - name: Wait for Prometheus to be available
       run: |
-        # Iniciar el contenedor de Prometheus en la red
-        docker run -d --name prometheus_container --network my_network -p 9090:9090 \
-          -v $(pwd)/metrics/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
-          prom/prometheus \
-          --config.file=/etc/prometheus/prometheus.yml \
-          --storage.tsdb.path=/prometheus
-
-    - name: Check if API container is running
-      run: |
-        echo "Checking if API container is running..."
-        docker ps
-
-    - name: Get Prometheus logs
-      run: |
-        echo "Getting logs from Prometheus container..."
-        docker logs prometheus_container || echo "Prometheus container not running"
-
-    - name: Wait for Prometheus to be ready
-      run: |
-        # Esperar a que Prometheus esté disponible
         echo "Waiting for Prometheus to be available..."
         for i in {1..30}; do
           if curl --output /dev/null --silent --head --fail http://localhost:9090/; then
@@ -82,15 +56,13 @@ jobs:
 
     - name: Get metrics from Prometheus
       run: |
-        # Realizar una petición GET a Prometheus para obtener una métrica específica
+        # Realizar una petición GET a Prometheus para obtener la métrica healthcheck_status
         METRIC_NAME="healthcheck_status"
         RESPONSE=$(curl -s "http://localhost:9090/api/v1/query?query=$METRIC_NAME")
         echo "Response from Prometheus:"
         echo $RESPONSE
 
-    - name: Stop Docker containers
+    - name: Stop services
       run: |
-        # Detener y eliminar los contenedores después de obtener la métrica
-        docker stop api_dockerhub_clientes prometheus_container
-        docker rm api_dockerhub_clientes prometheus_container
-        docker network rm my_network # Eliminar la red personalizada
+        # Detener y eliminar los servicios después de obtener la métrica
+        docker-compose down

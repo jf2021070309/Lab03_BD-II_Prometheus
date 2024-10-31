@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {}
+    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\proyecto\\ClienteAPI\\ClienteAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj": {
+    "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\proyecto\\ClienteAPI\\ClienteAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
+        "projectUniqueName": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\proyecto\\ClienteAPI\\ClienteAPI.csproj",
         "projectName": "ClienteAPI",
-        "projectPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\ClienteAPI.csproj",
+        "projectPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\proyecto\\ClienteAPI\\ClienteAPI.csproj",
         "packagesPath": "C:\\Users\\Jaimeelias\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\prueba\\no\\Lab03_BD-II_Prometheus\\obj\\",
+        "outputPath": "C:\\Users\\Jaimeelias\\Documents\\BASE DE DATOS II\\lab3\\proyecto\\ClienteAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Jaimeelias\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -62,29 +62,17 @@
               "target": "Package",
               "version": "[8.0.10, )"
             },
-            "Microsoft.Extensions.Diagnostics.HealthChecks": {
-              "target": "Package",
-              "version": "[8.0.10, )"
-            },
-            "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.10, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.4.0, )"
             },
-            "prometheus-net": {
-              "target": "Package",
-              "version": "[8.2.1, )"
-            },
             "prometheus-net.AspNetCore": {
               "target": "Package",
-              "version": "[8.2.1, )"
+              "version": "[7.0.0, )"
             },
             "prometheus-net.AspNetCore.HealthChecks": {
               "target": "Package",
-              "version": "[8.2.1, )"
+              "version": "[7.0.0, )"
             }
           },
           "imports": [

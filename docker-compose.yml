@@ -8,7 +8,7 @@ services:
       - ACCEPT_EULA=y
       - SA_PASSWORD=UPT.2024
     volumes:
-      - ./db:/var/opt/mssql/data
+      - ./db:/tmp
   api:
     build: .
     container_name: api_clientes
@@ -18,17 +18,6 @@ services:
       - ConnectionStrings__ClienteDB=Server=bd_clientes;Database=BD_CLIENTES;User Id=admin_user;Password=UPT.2024;TrustServerCertificate=true
     depends_on:
       - bd
-
-  api_dockerhub:
-    image: jf202107309/lab03_bd-ii_prometheus:latest  # Usar la imagen de Docker Hub
-    container_name: api_dockerhub_clientes
-    ports:
-      - "5001:8080"  # Puerto para acceder a la API desde Docker Hub
-    environment:
-      - ConnectionStrings__ClienteDB=Server=bd_clientes;Database=BD_CLIENTES;User Id=admin_user;Password=UPT.2024;TrustServerCertificate=true
-    depends_on:
-      - bd
-      
   prometheus:
     container_name: prometheus
     image: prom/prometheus

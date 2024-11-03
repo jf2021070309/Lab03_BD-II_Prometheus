@@ -4,8 +4,7 @@ using Prometheus;
 // Referencias extras
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-using System.Text;
+using ClienteAPI.Services;
 using System.Text.Json;
 
 
@@ -75,6 +74,21 @@ app.MapHealthChecks("/healthz", new HealthCheckOptions
     }
 });
 
+// Simular la recolección de datos climáticos
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var random = new Random();
+    Task.Run(async () =>
+    {
+        while (true)
+        {
+            // Simular datos climáticos
+            var temperatura = random.NextDouble() * (35 - 20) + 20; // Temperatura entre 20 y 35 grados
+            MetricsService.ReportarDatosClimaticos(temperatura);
+            await Task.Delay(5000); // Esperar 5 segundos
+        }
+    });
+});
 
 
 app.MapControllers();

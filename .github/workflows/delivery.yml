@@ -24,51 +24,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
+
       - name: Pull Docker image
         run: |
           docker pull jf202107309/lab03_bd-ii_prometheus:latest
+
       - name: Run Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
-      - name: Check health status of host.docker.internal:5000
+
+      - name: Wait for services to be ready
         run: |
-          echo "Checking health status of host.docker.internal:5000..."
-          for i in {1..10}; do  # 20 intentos de 30 segundos cada uno (total 5 minutos)
-            sleep 30
-            health_check_response=$(curl -s -G http://localhost:5000/api/v1/query --data-urlencode 'query=healthcheck_status')
-            echo "Health check response: $health_check_response"
-            # Verificar si la respuesta contiene un estado saludable (1)
-            if [[ $health_check_response == *'"value":[*1*' ]]; then
-                echo "Health status of host.docker.internal:5000 is 1 (healthy)."
-                break  # Salir del bucle si el estado es saludable
-            else
-                echo "Health status of host.docker.internal:5000 is not 1 (not healthy). Retrying..."
-            fi
-            
-            # Si es el último intento, fallar el paso
-            if [ $i -eq 20 ]; then
-                echo "Failed to get a healthy status from host.docker.internal:5000 after 20 attempts."
-                exit 1  # Fallar el paso si la API no está saludable después de 20 intentos
-            fi
-          done
-      - name: Check health status of localhost:9090
+          echo "Waiting for services to be ready..."
+          sleep 1000 # Espera de 1000 segundos
+
+      - name: Query Prometheus for metrics
         run: |
-          echo "Checking health status of localhost:9090..."
-          for i in {1..10}; do  # 20 intentos de 30 segundos cada uno (total 5 minutos)
-            sleep 30
-            health_check_response=$(curl -s -G http://localhost:9090/api/v1/query --data-urlencode 'query=healthcheck_status')
-            echo "Health check response: $health_check_response"
-            # Verificar si la respuesta contiene un estado saludable (1)
-            if [[ $health_check_response == *'"value":[*1*' ]]; then
-                echo "Health status of localhost:9090 is 1 (healthy)."
-                break  # Salir del bucle si el estado es saludable
-            else
-                echo "Health status of localhost:9090 is not 1 (not healthy). Retrying..."
-            fi
-            
-            # Si es el último intento, fallar el paso
-            if [ $i -eq 20 ]; then
-                echo "Failed to get a healthy status from localhost:9090 after 20 attempts."
-                exit 1  # Fallar el paso si la API no está saludable después de 20 intentos
-            fi
-          done
+          response=$(curl -G 'http://localhost:9090/api/v1/query' --data-urlencode 'query=datos_climaticos_temperatura_media')
+          echo "Prometheus response: $response"

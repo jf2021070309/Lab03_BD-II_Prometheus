@@ -36,7 +36,7 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "Waiting for API to be ready..."
-          until $(curl --output /dev/null --silent --head --fail http://localhost:5000/metrics); do
+          until $(curl --output /dev/null --silent --head --fail http://localhost:5001/metrics); do
             printf '.'
             sleep 5
           done

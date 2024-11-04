@@ -41,6 +41,11 @@ jobs:
           done
           echo "¡La API está lista!"
 
+      - name: Esperar 20 segundos
+        run: |
+          echo "Esperando 20 segundos antes de consultar las métricas..."
+          sleep 20
+
       - name: Consultar métricas de Prometheus
         run: |
           response=$(curl -G 'http://localhost:9090/api/v1/query' --data-urlencode 'query=datos_climaticos_temperatura_media')

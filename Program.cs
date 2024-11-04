@@ -1,7 +1,6 @@
 using ClienteAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
-// Referencias extras
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ClienteAPI.Services;
@@ -17,14 +16,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Agregar servicios de Health Checks
-var connectionString = builder.Configuration.GetConnectionString("ClienteDB");
+// Configuración de Health Checks para verificar la salud de la aplicación
+var connectionString = builder.Configuration.GetConnectionString("ClienteDB"); // Obtener la cadena de conexión
 
 if (!string.IsNullOrEmpty(connectionString))
 {
-    builder.Services.AddHealthChecks()
+    builder.Services.AddHealthChecks() // Agregar Health Checks
         .AddSqlServer(
-            connectionString: connectionString, // Validado para evitar referencia nula
+            connectionString: connectionString,
             name: "ClienteDB_HealthCheck", // Nombre del Health Check
             failureStatus: HealthStatus.Unhealthy);
 }
@@ -35,8 +34,7 @@ else
 
 
 var app = builder.Build();
-
-// Middleware para Prometheus
+// Configuración del middleware para la recolección de métricas con Prometheus
 app.UseMetricServer(); // Activar el servidor de métricas para Prometheus
 app.UseHttpMetrics(); // Métricas HTTP para Prometheus
 app.UseSwagger();
@@ -44,11 +42,11 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-// Contador para la métrica de Health Check
+// Creación de una métrica para el estado de salud de la aplicación
 var healthCheckMetric = Metrics.CreateGauge("healthcheck_status", "Indicates the health status of the application. 1 for healthy, 0 for unhealthy.");
 
 
-// Endpoint de Health Checks
+// Configuración del endpoint para los Health Checks
 app.MapHealthChecks("/healthz", new HealthCheckOptions
 {
     ResponseWriter = async (context, report) =>
@@ -74,7 +72,7 @@ app.MapHealthChecks("/healthz", new HealthCheckOptions
     }
 });
 
-// Simular la recolección de datos climáticos
+// Simular la recolección de datos climáticos con datos Random
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var random = new Random();
@@ -91,6 +89,6 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 
-app.MapControllers();
+app.MapControllers(); // Mapea los controladores a la aplicación
 
-app.Run();
+app.Run(); // Ejecuta la aplicación y comienza a escuchar las solicitudes

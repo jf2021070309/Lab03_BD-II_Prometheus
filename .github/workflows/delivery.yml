@@ -1,48 +1,47 @@
-name: Delivery Workflow
-
+name: Delivery 
 on:
   workflow_dispatch: # Activado manualmente
 
 jobs:
-  deploy:
+  despliegue:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Obtener código
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
+      - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Login to Docker Hub
+      - name: Iniciar sesión en Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Install Docker Compose
+      - name: Instalar Docker Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      - name: Pull Docker image
+      - name: Descargar imagen de Docker
         run: |
           docker pull jf202107309/lab03_bd-ii_prometheus:latest
 
-      - name: Run Docker Compose
+      - name: Ejecutar Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      - name: Wait for services to be ready
+      - name: Esperar a que los servicios estén listos
         run: |
-          echo "Waiting for API to be ready..."
+          echo "Esperando a que la API esté lista..."
           until $(curl --output /dev/null --silent --head --fail http://localhost:5001/metrics); do
             printf '.'
             sleep 5
           done
-          echo "API is ready!"
+          echo "¡La API está lista!"
 
-      - name: Query Prometheus for metrics
+      - name: Consultar métricas de Prometheus
         run: |
           response=$(curl -G 'http://localhost:9090/api/v1/query' --data-urlencode 'query=datos_climaticos_temperatura_media')
-          echo "Prometheus response: $response"
+          echo "Respuesta de Prometheus: $response"
